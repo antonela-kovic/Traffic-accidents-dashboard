@@ -1,166 +1,87 @@
+# Traffic Accidents and Risk Zones – Interactive Dashboard
 
-# Interaktivni dashboard “Prometne nesreće i rizične zone”
+An interactive React dashboard for exploring traffic accidents in space (map), time (trend and day × hour heatmap) and by cause and severity. All views are linked: a date range selected on the trend chart, a clicked cause or a severity filter updates the map, the charts and the key figures at once. A grid-based hotspot view highlights high-risk zones, weighted by accident severity.
 
-Ovaj projekt je web dashboard za **vizualnu analizu prometnih nesreća** kroz prostor (karta), vrijeme (trendovi) i atribute nesreće (uzrok, težina, područje). Aplikacija omogućuje korisniku da brzo pronađe **hotspotove/rizične zone**, prepozna obrasce (npr. dani i sati s najvećim brojem nesreća) te istraži kako se uzroci i težine mijenjaju kroz filtre i povezane prikaze.
+The included data are 20,000 crashes from the City of Chicago open data portal (24 October – 31 December 2024).
 
-## Značajke
-- Interaktivna **karta** nesreća (točke ili agregirano) s tooltip detaljima.
-- **Trend kroz vrijeme** (linijski graf) s odabirom vremenskog raspona (date range / brush).
-- **Heatmap** (dan u tjednu × sat) za otkrivanje rizičnih termina.
-- **Bar chart** najčešćih uzroka (Top N) s filtriranjem klikom.
-- **Filteri**: raspon datuma, težina, uzrok, regija/grad.
-- **Cross-filtering**: odabir na jednom prikazu filtrira i ažurira sve ostale prikaze.
-- Prikaz ključnih metrika (opcionalno): ukupno nesreća u odabiru, najčešći uzrok, najrizičniji sat.
+**Stack:** React 19 · Vite · Leaflet + react-leaflet · Recharts · PapaParse · Node.js (data script)
 
-## Korišteni podaci
-Projekt očekuje dataset u **CSV** ili **JSON** formatu (npr. otvoreni podaci, javne statistike, ili pripremljeni skup). Minimalno su potrebni:
-- `dateTime` — datum i vrijeme nesreće
-- `lat`, `lon` — geografske koordinate
-- `severity` — težina (npr. light/serious/fatal ili slične kategorije)
-- `cause` — uzrok (kategorija)
-- `region` / `city` — administrativna pripadnost (opcionalno, ali korisno)
+![Trend, heatmap and causes](docs/charts.png)
 
-Aplikacija pri učitavanju iz `dateTime` računa izvedene atribute:
-- `hour` (0–23)
-- `dayOfWeek` (Mon–Sun)
-- `monthKey` (npr. 2024-06)
+<!-- TODO: add a screenshot of the full dashboard with the map, e.g. docs/dashboard.png -->
 
-### Minimalni schema (JSON primjer)
-```json
-{
-  "id": "string",
-  "dateTime": "2024-06-15T21:35:00",
-  "lat": 43.508,
-  "lon": 16.439,
-  "severity": "light|serious|fatal",
-  "cause": "speeding|alcohol|priority|...",
-  "region": "Split-Dalmatia",
-  "city": "Split"
-}
-````
+---
 
-## Tehnologije
+## Features
 
-* Node.js + npm
-* React (Vite) + JavaScript
-* Leaflet + react-leaflet (karta)
-* Recharts (linijski i bar grafovi)
-* PapaParse (učitavanje CSV-a)
-* (Opcionalno) @nivo/heatmap (heatmap) ili custom heatmap komponenta
+- **Key figures** for the current selection: number of accidents, most common known cause, riskiest hour.
+- **Map** with one point per accident, or **hotspots**: accidents aggregated on a grid of adjustable cell size, with a risk score weighted by severity (light 1, serious 3, fatal 6).
+- **Trend over time** (daily counts) with a brush to select a date range.
+- **Heatmap** of accidents by weekday and hour.
+- **Causes**: top-12 bar chart (click a bar to filter) and a searchable table with counts and shares.
+- **Filters**: date range, region, cause and severity; all views are cross-filtered.
+- **Export** of the filtered accidents as CSV.
 
-## Pokretanje projekta
+## Architecture
 
-1. Kloniraj repozitorij:
-
-   ```bash
-   git clone <repo-url>
-   cd <repo-folder>
-   ```
-
-2. Instaliraj ovisnosti:
-
-   ```bash
-   npm install
-   ```
-
-3. Pokreni aplikaciju u development modu:
-
-   ```bash
-   npm run dev
-   ```
-
-4. Otvori u pregledniku (Vite će ispisati URL u konzoli), najčešće:
-
-   * `http://localhost:5173`
-
-## Build i preview
-
-1. Napravi production build:
-
-   ```bash
-   npm run build
-   ```
-
-2. Pokreni preview:
-
-   ```bash
-   npm run preview
-   ```
-
-## Konfiguracija podataka
-
-### Opcija A: JSON
-
-* Stavi datoteku u `src/data/accidents.json`
-* U loaderu učitaj tu datoteku (npr. fetch ili import)
-
-### Opcija B: CSV
-
-* Stavi datoteku u `src/data/accidents.csv`
-* U loaderu koristi PapaParse za parsiranje
-
-> Preporuka: za razvoj koristi manji `accidents_sample.csv/json` da sve radi brzo, a kasnije zamijeni pravim datasetom.
-
-## Korištenje
-
-1. Otvori dashboard.
-2. Filtriraj po **rasponu datuma**, uzroku, težini i području.
-3. Klikni na **uzrok** u bar chartu kako bi filtrirao sve prikaze na taj uzrok.
-4. Odaberi period na trend grafu (date range/brush) i prati kako se mijenjaju:
-
-   * hotspotovi na karti
-   * heatmap intenzitet
-   * rangiranje uzroka
-5. Hover na elemente prikaza (točka/ćelija/stupac) za tooltip i detalje.
-
-## Struktura projekta (predložena)
-
-```
-traffic-dashboard/
-│
-├── public/
-│
-├── src/
-│   ├── data/
-│   │   ├── accidents_sample.csv
-│   │   └── accidents_sample.json
-│   │
-│   ├── lib/
-│   │   ├── dataLoaders.js      # učitavanje CSV/JSON
-│   │   ├── transforms.js       # parsiranje i izvedeni atributi
-│   │   └── aggregations.js     # groupByMonth, heatmap matrix, groupByCause...
-│   │
-│   ├── state/
-│   │   ├── filtersReducer.js   # globalni filter state
-│   │   └── selectors.js        # applyFilters + pomoćne funkcije
-│   │
-│   ├── components/
-│   │   ├── FiltersPanel/
-│   │   ├── KPIHeader/
-│   │   ├── MapView/
-│   │   ├── TimeSeriesChart/
-│   │   ├── HeatmapChart/
-│   │   └── CausesBarChart/
-│   │
-│   ├── pages/
-│   │   └── Dashboard.jsx
-│   │
-│   ├── App.jsx
-│   └── main.jsx
-│
-├── package.json
-└── README.md
+```mermaid
+flowchart LR
+    API[(Chicago open data API<br/>Traffic Crashes)] -->|scripts/build_chicago_subset.mjs| CSV[public/data/accidents.csv]
+    CSV -->|PapaParse| N[normalise + derive<br/>hour, weekday, date]
+    N --> S[(all accidents)]
+    F[filters reducer<br/>date, region, cause, severity] --> SEL[applyFilters]
+    S --> SEL
+    SEL --> K[KPIs] & M[Map / hotspots] & T[Trend] & H[Heatmap] & C[Causes]
+    T -->|brush| F
+    C -->|click| F
 ```
 
-## Napomene (performanse i buduće nadogradnje)
+- `src/lib/` – CSV loading (`dataLoaders`), normalisation and derived fields (`transforms`), aggregations: per day, day × hour matrix, causes, KPIs, grid hotspots (`aggregations`), CSV export.
+- `src/state/` – filter state as a reducer (`filtersReducer`) and the filter function (`selectors`).
+- `src/components/` – one folder per view (map, charts, filters, KPIs, causes table).
 
-* Ako dataset ima puno zapisa, karta s velikim brojem točaka može biti spora:
+## Getting started
 
-  * koristiti klasteriranje ili agregaciju (grid/hexbin).
-* Moguće nadogradnje:
+```bash
+git clone https://github.com/antonela-kovic/traffic-accidents-dashboard.git
+cd traffic-accidents-dashboard
+npm install
+npm run dev        # http://localhost:5173
+```
 
-  * “Compare mode” (usporedba 2 perioda)
-  * export prikaza (PNG/CSV)
-  * ponderirani rizik (teže nesreće povećavaju score zone)
+Other scripts: `npm run build`, `npm run preview`, `npm run lint`.
 
+### Refreshing the data
 
+```bash
+npm run data:chicago                              # 2024, 20,000 rows
+npm run data:chicago -- --year 2023 --limit 30000
+```
+
+The script downloads crashes from the [City of Chicago Traffic Crashes dataset](https://data.cityofchicago.org/Transportation/Traffic-Crashes-Crashes/85ca-t3if), maps the most severe injury to `light` / `serious` / `fatal` / `unknown` and the primary contributory cause to `cause`, and writes `public/data/accidents.csv`. A full year has more than 20,000 crashes, so a larger `--limit` covers more of the year.
+
+### Using your own data
+
+Any CSV with these columns works (`public/data/accidents_sample.csv` is a small example):
+
+| Column | Example |
+|---|---|
+| `id` | any unique value |
+| `dateTime` | `2024-06-15T21:35:00` |
+| `lat`, `lon` | `43.508`, `16.439` |
+| `severity` | `light`, `serious`, `fatal` or `unknown` |
+| `cause` | `speeding` |
+| `region`, `city` | `Split-Dalmatia`, `Split` |
+
+## Notes
+
+- About 40 % of the Chicago records have the cause "UNABLE TO DETERMINE". The bar chart and the table show it, but the "most common known cause" figure skips such placeholder values.
+- Points are drawn on a canvas so that 20,000 markers stay responsive; the hotspot view limits the map to the 300 highest-scoring cells.
+
+## Data
+
+City of Chicago, *Traffic Crashes – Crashes*, Chicago Data Portal. Map tiles © OpenStreetMap contributors.
+
+## Author
+
+Antonela Ković – [GitHub](https://github.com/antonela-kovic)

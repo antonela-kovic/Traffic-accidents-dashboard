@@ -1,0 +1,9 @@
+id,dateTime,lat,lon,severity,cause,region,city
+1,2024-06-15T21:35:00,43.5080,16.4390,light,speeding,Split-Dalmatia,Split
+2,2024-06-15T22:10:00,43.5101,16.4402,serious,alcohol,Split-Dalmatia,Split
+3,2024-06-16T08:05:00,43.5125,16.4451,light,priority,Split-Dalmatia,Split
+4,2024-06-17T17:20:00,43.5200,16.4300,fatal,speeding,Split-Dalmatia,Solin
+5,2024-06-18T09:45:00,43.5150,16.4600,light,distraction,Split-Dalmatia,Split
+6,2024-06-18T18:10:00,45.8150,15.9819,serious,speeding,Zagreb, Zagreb
+7,2024-06-19T01:05:00,45.8120,15.9900,light,alcohol,Zagreb, Zagreb
+8,2024-06-19T13:15:00,45.8200,15.9700,light,priority,Zagreb, Zagreb
